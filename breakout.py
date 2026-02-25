@@ -4,6 +4,8 @@
 import pygame
 import random
 import sys
+import os
+import time
 from game import GameState
 
 # Create the central GameState
@@ -47,23 +49,35 @@ while not state.exit:
 
     # Menu loop
     menu = True
-    while menu:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_q:
+    # If AUTO_START is set, bypass menu and start immediately
+    if os.getenv('AUTO_START'):
+        gameRunning = True
+        menu = False
+    else:
+        while menu:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-                if event.key == pygame.K_SPACE:
-                    gameRunning = True
-                    menu = False
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_q:
+                        pygame.quit()
+                        sys.exit()
+                    if event.key == pygame.K_SPACE:
+                        gameRunning = True
+                        menu = False
                     
     state.reset_wall()
 
     # Game loop
     while gameRunning:
+        # If AUTO_RUN_SECONDS is set, set up a start time and timeout once
+        if os.getenv('AUTO_RUN_SECONDS') and not hasattr(state, '_auto_start_time'):
+            try:
+                state._auto_run_timeout = float(os.getenv('AUTO_RUN_SECONDS'))
+            except ValueError:
+                state._auto_run_timeout = None
+            state._auto_start_time = time.time()
 
         # Get keypresses
         for event in pygame.event.get():
@@ -115,6 +129,12 @@ while not state.exit:
         pygame.display.update()        
         
         state.gameClock.tick( state.gameSpeed )
+        # Auto-run check: if AUTO_RUN_SECONDS was set, stop after elapsed time
+        if hasattr(state, '_auto_start_time') and getattr(state, '_auto_run_timeout', None) is not None:
+            if (time.time() - state._auto_start_time) >= state._auto_run_timeout:
+                gameRunning = False
+                state.exit = True
+                break
         
     state.exit = True
 
