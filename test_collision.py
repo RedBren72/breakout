@@ -1,7 +1,7 @@
 import pygame
 from ball import Ball
 from bat import Bat
-from game import dirLEFT, dirRIGHT, dirSTOP
+from constants import dirLEFT, dirRIGHT, dirSTOP
 
 pygame.init()
 

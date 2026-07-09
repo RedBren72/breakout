@@ -7,45 +7,62 @@ import sys
 import os
 import time
 from game import GameState
+from constants import (rgbWHITE, rgbGREEN, rgbCYAN, rgbBLUE, rgbMAGENTA, rgbRED,
+                       rgbYELLOW, rgbGREY224, rgbGREY192, rgbGREY160, rgbGREY128,
+                       rgbGREY096, rgbGREY064, rgbGREY032, rgbBLACK, dirLEFT, dirRIGHT, dirSTOP)
 
 # Create the central GameState
 state = GameState()
 
 # Function to show intro screen
-def showIntro():
+def show_intro(game_state):
+    font_large = pygame.font.SysFont(None, 200)
+    font_medium = pygame.font.SysFont(None, 50)
+    title_text = font_large.render("Breakout", True, rgbWHITE)
+    direction_text = font_medium.render("Z for Left - X for Right SHIFT for Speed", True, rgbWHITE)
+    instruction_text = font_medium.render("Press SPACE to Start", True, rgbWHITE)
 
-    font = pygame.font.SysFont(None, 200)
-    titleText = font.render("Breakout", True, state.rgbWHITE)
-    font = pygame.font.SysFont(None, 50)
-    directionText = font.render("Z for Left - X for Right SHIFT for Speed", True, state.rgbWHITE)
-    instructionText = font.render("Press SPACE to Start", True, state.rgbWHITE)
+    flash_colours = [rgbGREEN, rgbCYAN, rgbBLUE, rgbMAGENTA, rgbRED, rgbYELLOW,
+                     rgbWHITE, rgbGREY224, rgbGREY192, rgbGREY160, rgbGREY128,
+                     rgbGREY096, rgbGREY064, rgbGREY032, rgbBLACK]
+    
+    last_flash_time = pygame.time.get_ticks()
+    flash_delay = 200  # ms
+    color_index = 0
 
-    # create an array of colours to flash
-    flashColours = [state.rgbGREEN, state.rgbCYAN, state.rgbBLUE, state.rgbMAGENTA, state.rgbRED, state.rgbYELLOW, state.rgbWHITE, state.rgbGREY224, state.rgbGREY192, state.rgbGREY160, state.rgbGREY128, state.rgbGREY096, state.rgbGREY064, state.rgbGREY032, state.rgbBLACK]
+    # Flashing screen until a key is pressed
+    while color_index < len(flash_colours):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_q):
+                return False # Signal to exit
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                return True # Signal to start
 
-    # Flashing screen
-    for colour in flashColours:
-        state.gameScreen.fill( colour )
-        if colour in flashColours[7:len(flashColours)]: # Only display text on the monochrome colours
-            state.gameScreen.blit(titleText, (state.scrWIDTH // 2 - titleText.get_width() // 2, state.scrHEIGHT // 4))
-        pygame.display.update()
-        pygame.time.delay( 200 )
+        current_time = pygame.time.get_ticks()
+        if current_time - last_flash_time > flash_delay:
+            colour = flash_colours[color_index]
+            game_state.gameScreen.fill(colour)
+            if colour in flash_colours[7:]:  # Only display text on the monochrome colours
+                game_state.gameScreen.blit(title_text, (game_state.scrWIDTH // 2 - title_text.get_width() // 2, game_state.scrHEIGHT // 4))
+            pygame.display.update()
+            last_flash_time = current_time
+            color_index += 1
 
-    state.gameScreen.fill( state.rgbBLACK )
-    state.gameScreen.blit(titleText, (state.scrWIDTH // 2 - titleText.get_width() // 2, state.scrHEIGHT // 4))
-    state.gameScreen.blit(directionText, (state.scrWIDTH // 2 - directionText.get_width() // 2, state.scrHEIGHT // 2))
-    state.gameScreen.blit(instructionText, (state.scrWIDTH // 2 - instructionText.get_width() // 2, state.scrHEIGHT * 3 // 4))
+    # Final static screen
+    game_state.gameScreen.fill(rgbBLACK)
+    game_state.gameScreen.blit(title_text, (game_state.scrWIDTH // 2 - title_text.get_width() // 2, game_state.scrHEIGHT // 4))
+    game_state.gameScreen.blit(direction_text, (game_state.scrWIDTH // 2 - direction_text.get_width() // 2, game_state.scrHEIGHT // 2))
+    game_state.gameScreen.blit(instruction_text, (game_state.scrWIDTH // 2 - instruction_text.get_width() // 2, game_state.scrHEIGHT * 3 // 4))
     pygame.display.update()
-
-
-
-
+    return True
 
 # Main game loop
 while not state.exit:
     state.gameClock = pygame.time.Clock()
 
-    showIntro()
+    if not show_intro(state):
+        state.exit = True
+        break
 
     # Menu loop
     menu = True
@@ -87,28 +104,28 @@ while not state.exit:
                 if event.key == pygame.K_LSHIFT or event.key == pygame.K_RSHIFT:
                     state.bat.set_speed(state.scrSIZE // 2)                   
                 if event.key == pygame.K_z:
-                    state.bat.set_direction(state.dirLEFT)
+                    state.bat.set_direction(dirLEFT)
                 if event.key == pygame.K_x:
-                    state.bat.set_direction(state.dirRIGHT)
+                    state.bat.set_direction(dirRIGHT)
 
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_LSHIFT or event.key == pygame.K_RSHIFT:
                     state.bat.set_speed(state.scrSIZE // 4)
                 if event.key == pygame.K_z or event.key == pygame.K_x:
-                    state.bat.set_direction(state.dirSTOP)
+                    state.bat.set_direction(dirSTOP)
 
             if event.type == pygame.QUIT:
                 gameRunning = False
                 state.exit = True 
                 
         # Update bat position
-        state.bat.update(state.scrWIDTH)
+        state.bat.update()
 
         # Update ball position
-        state.ball.update(state.scrWIDTH, state.scrHEIGHT)
+        state.ball.update()
 
         # Check for missed ball
-        state.ball.check_missed(state.scrWIDTH, state.scrHEIGHT)
+        state.ball.check_missed()
 
         # Check for collision with wall
         score_from_wall = state.wall.check_collision(state.ball, state.scrWIDTH, state.level)
@@ -119,13 +136,13 @@ while not state.exit:
             state.score += state.level
         
         # Draw everything
-        state.gameScreen.fill( state.rgbCYAN )
+        state.gameScreen.fill(rgbCYAN)
         state.wall.draw(state.gameScreen)
         state.ball.draw(state.gameScreen)
         state.bat.draw(state.gameScreen)
         font = pygame.font.SysFont(None, 35)
-        scoreText = font.render("Score: " + str(state.score), True, state.rgbBLACK)
-        state.gameScreen.blit(scoreText, (10, state.scrHEIGHT - state.scrSIZE))
+        scoreText = font.render("Score: " + str(state.score), True, rgbBLACK)
+        state.gameScreen.blit(scoreText, (10, state.wall.screen_height - state.wall.brick_size))
         pygame.display.update()        
         
         state.gameClock.tick( state.gameSpeed )

@@ -1,5 +1,5 @@
 import pygame
-from game import rgbRED, rgbGREEN, rgbBLUE, rgbYELLOW, rgbMAGENTA, rgbBLACK
+from constants import rgbRED, rgbGREEN, rgbBLUE, rgbYELLOW, rgbMAGENTA, rgbBLACK
 
 class Wall:
     def __init__(self, screen_width, screen_height, brick_size, start_row=3):

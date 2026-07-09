@@ -1,4 +1,5 @@
 import pygame
+from constants import dirSTOP, dirLEFT, dirRIGHT, scrWIDTH
 
 class Bat:
     def __init__(self, x, y, width, height, color):
@@ -10,15 +11,15 @@ class Bat:
         self.direction = 0
         self.speed = 4
     
-    def update(self, width):
+    def update(self):
         """Update bat position based on direction and speed"""
         self.x += self.speed * self.direction
         
         # Keep bat within screen bounds
         if self.x < 0:
             self.x = 0
-        if self.x > width - self.width:
-            self.x = width - self.width
+        if self.x > scrWIDTH - self.width:
+            self.x = scrWIDTH - self.width
     
     def set_direction(self, direction):
         """Set the direction of movement"""
@@ -38,8 +39,6 @@ class Bat:
     
     def check_collision(self, ball_obj):
         """Check for collision with ball and handle bouncing"""
-        # Import direction constants here to avoid circular imports at module load
-        from game import dirSTOP, dirLEFT, dirRIGHT
         import os
         debug = bool(os.getenv("DEBUG_COLLISION"))
         ball_rect = pygame.Rect(ball_obj.x - ball_obj.radius, ball_obj.y - ball_obj.radius, ball_obj.radius * 2, ball_obj.radius * 2)
