@@ -16,6 +16,8 @@ class GameState:
     level: int = 1
     exit: bool = False
     keyPressed: bool = False
+    width: int = scrWIDTH
+    height: int = scrHEIGHT
 
     # runtime objects
     ball: Ball = None
@@ -28,8 +30,8 @@ class GameState:
     def __post_init__(self):
         # create game objects
         self.ball = Ball(
-            random.randint(-scrSIZE * 5, scrSIZE * 5) + scrWIDTH // 2,
-            scrHEIGHT // 2,
+            random.randint(-scrSIZE * 5, scrSIZE * 5) + self.width // 2,
+            self.height // 2,
             scrSIZE // 2,
             dirSTOP,
             dirDOWN,
@@ -37,19 +39,19 @@ class GameState:
         )
 
         self.bat = Bat(
-            (scrWIDTH // 2) - scrSIZE // 2,
-            scrHEIGHT - scrSIZE * 3,
+            (self.width // 2) - scrSIZE // 2,
+            self.height - scrSIZE * 3,
             scrSIZE * 4,
             scrSIZE,
             rgbBLACK,
         )
 
-        self.wall = Wall(scrWIDTH, scrHEIGHT, scrSIZE)
+        self.wall = Wall(self.width, self.height, scrSIZE)
 
         pygame.init()
         self.gameDisplay = pygame.display
         self.gameDisplay.set_caption("Breakout")
-        self.gameScreen = self.gameDisplay.set_mode(scrAREA)
+        self.gameScreen = self.gameDisplay.set_mode((self.width, self.height))
         self.gameClock = pygame.time.Clock()
 
     def reset_wall(self):

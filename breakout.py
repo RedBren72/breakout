@@ -2,7 +2,6 @@
 # Pygame version by ChatGPT 4.0
 
 import pygame
-import random
 import sys
 import os
 import time
@@ -102,7 +101,7 @@ while not state.exit:
                 if event.key == pygame.K_q:
                     gameRunning = False
                 if event.key == pygame.K_LSHIFT or event.key == pygame.K_RSHIFT:
-                    state.bat.set_speed(state.scrSIZE // 2)                   
+                state.bat.set_speed(state.bat.width // 4) # Speed based on bat width
                 if event.key == pygame.K_z:
                     state.bat.set_direction(dirLEFT)
                 if event.key == pygame.K_x:
@@ -110,7 +109,7 @@ while not state.exit:
 
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_LSHIFT or event.key == pygame.K_RSHIFT:
-                    state.bat.set_speed(state.scrSIZE // 4)
+                state.bat.set_speed(state.bat.width // 8) # Speed based on bat width
                 if event.key == pygame.K_z or event.key == pygame.K_x:
                     state.bat.set_direction(dirSTOP)
 
